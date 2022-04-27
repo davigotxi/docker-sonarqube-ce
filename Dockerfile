@@ -1,12 +1,16 @@
-## This is the 7.9 LTS version
-# https://github.com/SonarSource/docker-sonarqube/blob/62bf9864e14e439dcd0019e3205668d62f623169/7/community/Dockerfile
-FROM sonarqube:7.9-community
+## This is the 9.4 LTS version
+FROM sonarqube:9.4-community
 
 USER root
-## As per instructions https://github.com/mc1arke/sonarqube-community-branch-plugin
-ADD https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/1.3.0/sonarqube-community-branch-plugin-1.3.0.jar /opt/sonarqube/extensions/plugins/
-RUN cp /opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-1.3.0.jar /opt/sonarqube/lib/common/ \
-    && chown -R sonarqube:sonarqube /opt/sonarqube
+## As per instructions https://github.com/mc1arke/sonarqube-community-branch-plugin/tree/1.11.0
+# 1. Copy the plugin JAR file to the extensions/plugins/ directory of your SonarQube instance
+ADD --chown=sonarqube:sonarqube https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/1.11.0/sonarqube-community-branch-plugin-1.11.0.jar /opt/sonarqube/extensions/plugins/
+
+# 2. Add -javaagent:./extensions/plugins/sonarqube-community-branch-plugin-${version}.jar=web to the sonar.web.javaAdditionalOpts property in your Sonarqube installation's config/sonar.properties file, e.g. sonar.web.javaAdditionalOpts=-javaagent:./extensions/plugins/sonarqube-community-branch-plugin-1.8.0.jar=web
+# 3. Add -javaagent:./extensions/plugins/sonarqube-community-branch-plugin-${version}.jar=ce to the sonar.ce.javaAdditionalOpts property in your Sonarqube installation's config/sonar.properties file, e.g. sonar.ce.javaAdditionalOpts=-javaagent:./extensions/plugins/sonarqube-community-branch-plugin-1.8.0.jar=ce
+COPY --chown=sonarqube:sonarqube ./sonar.properties /opt/sonarqube/conf/sonar.properties
+
+# 4. Start Sonarqube, and accept the warning about using third-party plugins
 
 USER sonarqube
 
